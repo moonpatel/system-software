@@ -44,11 +44,14 @@ int main(int argc, char const *argv[])
     char str[100];
     scanf("%s", str);
 
+    // a*
+    // int transitionMatrix1[2][2] = {
+    //     {0, 1},
+    //     {1, 1},
+    // };
+
     // a*b+
-    int transitionMatrix1[3][2] = {
-        {0, 1},
-        {2, 1},
-        {2, 2}};
+    int transitionMatrix1[3][2] = {{0, 1}, {2, 1}, {2, 2}};
     struct FSM fsm1 = generateFSM(3, 2, transitionMatrix1);
 
     int i = 0;
