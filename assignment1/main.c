@@ -1,52 +1,68 @@
 #include "stdio.h"
+#include "stdlib.h"
 
-// Define states
-typedef enum
+struct FSM
 {
-    STATE_START,
-    STATE_TRAP
-} State;
+    size_t numStates;
+    size_t numEvents;
+    int currentState;
+    enum CharEnum *charEnum;
+    int **transitionMatrix;
+    void (*StateTransitionFunction)(struct FSM *fsm, int event);
+};
 
-// Define events
-typedef enum
+void genericTransitionFunction(struct FSM *fsm, int event)
 {
-    A, // a
-    B  // b
-} Event;
+    size_t numStates = fsm->numStates;
+    size_t numEvents = fsm->numEvents;
+    fsm->currentState = fsm->transitionMatrix[fsm->currentState][event];
+};
 
-// Function to handle state transitions
-void transition(State *currentState, Event event)
+struct FSM generateFSM(size_t numStates, size_t numEvents, int transitionMatrix[3][2])
 {
-    // Define transitions
-    switch (*currentState)
+    struct FSM fsm;
+    fsm.currentState = 0;
+    fsm.numStates = numStates;
+    fsm.numEvents = numEvents;
+    fsm.StateTransitionFunction = genericTransitionFunction;
+    fsm.transitionMatrix = (int **)malloc((fsm.numStates) * sizeof(int *));
+
+    for (int i = 0; i < fsm.numStates; i++)
     {
-    case STATE_START:
-        *currentState = event == A ? STATE_START : STATE_TRAP;
-        break;
-    case STATE_TRAP:
-        break;
+        fsm.transitionMatrix[i] = (int *)malloc(fsm.numEvents * sizeof(int));
+        for (int j = 0; j < fsm.numEvents; j++)
+        {
+            fsm.transitionMatrix[i][j] = transitionMatrix[i][j];
+        }
     }
+
+    return fsm;
 }
 
 int main(int argc, char const *argv[])
 {
-    printf("%d\n", argc);
-    State currentState = STATE_START;
-
     char str[100];
     scanf("%s", str);
+
+    // a*b+
+    int transitionMatrix1[3][2] = {
+        {0, 1},
+        {2, 1},
+        {2, 2}};
+    struct FSM fsm1 = generateFSM(3, 2, transitionMatrix1);
 
     int i = 0;
     while (str[i] != '\0')
     {
-        transition(&currentState, str[i] == 'a' ? A : B);
+        genericTransitionFunction(&fsm1, str[i] == 'a' ? 0 : 1);
         i++;
     }
 
-    if (currentState == STATE_TRAP)
-        printf("String not valid.\n");
+    // right the program assumes there is only one final state
+    if (fsm1.currentState != 1)
+        printf("Not valid.\n");
     else
-        printf("String is valid.\n");
+        printf("Valid.\n");
 
     return 0;
 }
